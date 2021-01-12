@@ -30,25 +30,46 @@ def read_filter(filter):
   types = {}
   return types
 
-def main(directory, filter_path, destination=None):
+
+def make_filter():
+  while True:
+    types = input('Please enter all file types seperated by spaces: ')
+    confirm = input(f'Does this look correct? y/n {types} |: ')
+    if confirm.lower() == 'y':
+      list_types = types.lower().split()
+      break
+  return set(list_types)
+
+
+def vaild_inputs(directory, destination, filter_path):
   if destination is None:
     destination = directory
   # Checks that all inputs are valid
   if check_directory(directory):
-    if check_file(filter_path):
-      if check_directory(destination):
+    if filter_path is not None:
+      if check_file(filter_path):
         pass
       else:
-        print('Destination path is invalid')
+        print('File_filter path is invalid')
         sys.exit()
+    if check_directory(destination):
+      pass
     else:
-      print('File_filter path is invalid')
+      print('Destination path is invalid')
       sys.exit()
   else:
     print('Directory path is invalid')
     sys.exit()
-  file_filter = read_filter(filter_path)
-  # file_type_set = set()
+
+
+def main(directory, destination=None, filter_path=None):
+  vaild_inputs(directory, destination, filter_path)
+  if filter_path is not None:
+    file_filter = read_filter(filter_path)
+  else:
+    file_filter = make_filter()
+  print(file_filter)
+  print('success')
 
   # for path, dirs, files in os.walk(source):
   #   print(path)
@@ -66,4 +87,15 @@ def main(directory, filter_path, destination=None):
 
 
 if __name__ == '__main__':
-  main(*sys.argv[1:])
+  if len(sys.argv) == 2:
+    main(*sys.argv)
+  elif len(sys.argv) == 3:
+    # Check if destiation or filter_path is provided
+    if check_directory(sys.argv[2]):
+      main(*sys.argv[1:])
+    else:
+      main(sys.argv[1], None, sys.argv[2])
+  elif len(sys.argv) == 4:
+    main(*sys.argv[1:])
+  else:
+    print("Err")

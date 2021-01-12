@@ -1,6 +1,6 @@
 # File sorting program
 
-Using cmd line arguments 
+Using cmd line arguments to sort the contents of a target directory based on file types.
 
 
 # To run:
@@ -11,3 +11,9 @@ If destination_path is not given the destination will be set to the directory_pa
 `python main.sort.py sorted_files 'directory_path', 'destination_path'`
 If filter_file_path is not given you will be asked to enter the file types you want to filter
 `python main.sort.py sorted_files 'directory_path', 'filter_file_path'`
+
+# Done/To-Do
+- User input for paths and folder name |X
+- Create repective folders to sort into|X
+- Traverse target directory's contents |
+- Sort via moving contents accordingly |

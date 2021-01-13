@@ -2,6 +2,15 @@
 # Author: Nathan Gilbert
 import shutil, os, sys
 
+image_filetypes = ['tif', 'tiff', 'gif', 'jpeg', 'jpg', 'jif',
+                  'jfif', 'jp2', 'jpx', 'j2k', 'j2c', 'fpx', 'pcd', 'png', 'ai', 'psd']
+document_filetypes = ['xls', 'doc', 'docx', 'pdf',
+                      'txt', 'xlsx', 'xlsm', 'ppt', 'pps', 'pptx']
+audio_filetypes = ['mp3', 'aac', 'ac3', 'wav',
+                  'wma', 'ogg', 'midi', 'mid', 'cda', 'aif']
+video_filetypes = ['mp4', 'h264', 'avi', 'mkv', 'mpeg',
+                  'mpg', 'mov', 'm4v', 'flv', '3gp', 'wmv', 'vob']
+
 
 def check_directory(directory):
   return os.path.isdir(directory)
@@ -12,10 +21,6 @@ def check_file(file):
 
 
 def create_folders(main_folder, destination, filter_set):
-  image_filetypes = ['tif', 'tiff', 'gif', 'jpeg', 'jpg', 'jif', 'jfif', 'jp2', 'jpx', 'j2k', 'j2c', 'fpx', 'pcd', 'png', 'ai', 'psd']
-  document_filetypes = ['xls', 'doc', 'docx', 'pdf', 'txt', 'xlsx', 'xlsm', 'ppt', 'pps', 'pptx']
-  audio_filetypes = ['mp3', 'aac', 'ac3', 'wav', 'wma', 'ogg', 'midi', 'mid', 'cda', 'aif']
-  video_filetypes = ['mp4', 'h264', 'avi', 'mkv', 'mpeg', 'mpg', 'mov', 'm4v', 'flv', '3gp', 'wmv', 'vob']
   filetype_directories = ['Image files', 'Document files', 'Audio files', 'Video files', 'Misc files']
   main_directory = f'{destination}\{main_folder}'
   sub_directories = {}
@@ -35,23 +40,23 @@ def create_folders(main_folder, destination, filter_set):
     # Seperates the file types into their respective folder
     if file_type in image_filetypes:
       sub_directories[file_type] = create_subdirectory(
-        main_directory, 'Image files', file_type
+        main_directory, filetype_directories[0], file_type
       )
     elif file_type in document_filetypes:
       sub_directories[file_type] = create_subdirectory(
-          main_directory, 'Document files', file_type
+          main_directory, filetype_directories[1], file_type
       )
     elif file_type in audio_filetypes:
       sub_directories[file_type] = create_subdirectory(
-        main_directory, 'Audio files', file_type
+          main_directory, filetype_directories[2], file_type
       )
     elif file_type in video_filetypes:
       sub_directories[file_type] = create_subdirectory(
-        main_directory, 'Video files', file_type
+          main_directory, filetype_directories[3], file_type
       )
     else:
       sub_directories[file_type] = create_subdirectory(
-        main_directory, 'Misc files', file_type
+        main_directory, filetype_directories[4], file_type
       )
   return sub_directories
 
@@ -113,6 +118,39 @@ def vaild_inputs(main_folder, directory, destination, filter_path):
   return destination
 
 
+def get_file_type(file_name):
+  type = file_name.split('.')
+  if len(type) < 2:
+    pass
+  else:
+    return file_name.split('.')[1]
+
+
+def traverse_directory(directory, main_directory, file_filter, destination):
+  file_paths = {}
+  # Sets filter for paths
+  for file_type in file_filter:
+    file_paths[file_type] = []
+
+  for path, dirs, files in os.walk(directory):
+    # Removes the directory created by this program
+    try:
+      dirs.remove(main_directory)
+    except ValueError:
+      pass
+    for file in files:
+      file_type = get_file_type(file)
+      if file_type in file_paths:
+        file_paths[file_type].append(os.path.join(path, file))
+    for directory in dirs:
+      result = input(f'Would you like to move or avoid "{directory}" m/move to move press enter to avoid')
+      if result.lower() == 'm' or result.lower() == 'move':
+        move_content(os.path.join(path, directory), main_directory)
+
+
+def move_content(content_path, destination):
+  pass
+
 def main(main_folder, directory, destination=None, filter_path=None):
   destination = vaild_inputs(main_folder, directory, destination, filter_path)
   if filter_path is not None:
@@ -121,14 +159,8 @@ def main(main_folder, directory, destination=None, filter_path=None):
     file_filter = make_filter()
   sub_directories = create_folders(main_folder, destination, file_filter)
   print(sub_directories)
+  traverse_directory(directory, main_folder, file_filter)
   print('success')
-
-  # for path, dirs, files in os.walk(source):
-  #   print(path)
-  #   for file in files:
-  #     print(os.path.join(path, file))
-  #     set.add(get_file_type(file))
-
 
 
 if __name__ == '__main__':

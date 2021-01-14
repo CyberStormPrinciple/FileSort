@@ -119,37 +119,61 @@ def vaild_inputs(main_folder, directory, destination, filter_path):
 
 
 def get_file_type(file_name):
-  type = file_name.split('.')
-  if len(type) < 2:
+  file_segments = file_name.split('.')
+  if len(file_segments) < 2:
     pass
   else:
-    return file_name.split('.')[1]
+    return file_name.split('.')[len(file_segments) - 1].lower()
 
 
-def traverse_directory(directory, main_directory, file_filter, destination):
+def traverse_directory(directory, main_directory_name, file_filter, destination):
   file_paths = {}
+  avoid_directories = [main_directory_name, '$RECYCLE.BIN']
   # Sets filter for paths
   for file_type in file_filter:
     file_paths[file_type] = []
-
-  for path, dirs, files in os.walk(directory):
+  # Traverse given directory from top down recursively 
+  for path, dirs, files in os.walk(directory, topdown=True):
     # Removes the directory created by this program
     try:
-      dirs.remove(main_directory)
+      for a_dir in avoid_directories:
+        del dirs[dirs.index(a_dir)]
     except ValueError:
-      pass
+        pass
+    # Adds path of files based on filter
     for file in files:
       file_type = get_file_type(file)
       if file_type in file_paths:
         file_paths[file_type].append(os.path.join(path, file))
-    for directory in dirs:
-      result = input(f'Would you like to move or avoid "{directory}" m/move to move press enter to avoid')
-      if result.lower() == 'm' or result.lower() == 'move':
-        move_content(os.path.join(path, directory), main_directory)
+    avoid_directories = []
+    dirs_copy = dirs.copy()
+    # Traverses all directories in allowed directories
+    while len(dirs_copy) > 0:
+      for directory in dirs_copy:
+        result = input(f'Would you like to "move", "sort" or "avoid" "{directory}": ')
+        if result.lower() == 'm' or result.lower() == 'move':
+          print(f'Moving {directory}')
+          move_content(os.path.join(path, directory), main_directory_name)
+        elif result.lower() == 's' or result.lower() == 'sort':
+          print(f'Sorting {directory}')
+        else:
+          avoid_directories.append(directory)
+        dirs_copy.remove(directory)
+        # Removes directories from dirs to traverse
+        for a_dir in avoid_directories:
+          if a_dir in dirs:
+            del dirs[dirs.index(a_dir)]
+  return file_paths
 
+def combine_dictionaries(higher_dictionary, lower_dictionary):
+  for file_type in higher_dictionary:
+    higher_dictionary[file_type] += lower_dictionary[file_type]
+  return higher_dictionary
 
+# TO-DO
 def move_content(content_path, destination):
   pass
+
 
 def main(main_folder, directory, destination=None, filter_path=None):
   destination = vaild_inputs(main_folder, directory, destination, filter_path)
@@ -159,7 +183,8 @@ def main(main_folder, directory, destination=None, filter_path=None):
     file_filter = make_filter()
   sub_directories = create_folders(main_folder, destination, file_filter)
   print(sub_directories)
-  traverse_directory(directory, main_folder, file_filter)
+  file_paths = traverse_directory(directory, main_folder, file_filter, destination)
+  print(file_paths)
   print('success')
 
 

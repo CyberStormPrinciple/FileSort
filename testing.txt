@@ -1,3 +1,4 @@
 python main.sort.py sort_test 'D:\' 'E:\Coding\FileSorter\file_type_filter.txt'
+python main.sort.py sort_test 'E:\Pics' 'E:\test_collection' 'E:\Coding\FileSorter\file_type_filter.txt'
 python main.sort.py sorted_files_test 'E:\' 'E:\Coding\FileSorter\file_type_filter.txt'
 python main.sort.py sort_test2 'E:\Pics' 'E:\Coding\FileSorter\file_type_filter.txt'

@@ -16,4 +16,4 @@ Using cmd line arguments to sort the contents of a target directory based on fil
 - User input for paths and folder name | X
 - Create repective folders to sort into| X
 - Traverse target directory's contents | X
-- Sort via moving contents accordingly |
+- Sort via moving contents accordingly | X

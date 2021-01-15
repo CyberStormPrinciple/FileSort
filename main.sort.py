@@ -21,6 +21,7 @@ def check_file(file):
 
 
 def create_folders(main_folder, destination, filter_set):
+  """Creates the folders that hold subdirectories for specific file types"""
   filetype_directories = ['Image files', 'Document files', 'Audio files', 'Video files', 'Misc files']
   main_directory = f'{destination}\{main_folder}'
   sub_directories = {}
@@ -58,10 +59,11 @@ def create_folders(main_folder, destination, filter_set):
       sub_directories[file_type] = create_subdirectory(
         main_directory, filetype_directories[4], file_type
       )
-  return sub_directories
+  return sub_directories # Dictionary of Key: file type, Value: subdirectory path 
 
 
 def create_subdirectory(main_directory, sub_directory, file_type):
+  """Creates the subdirectories that are inside the main_directory"""
   try:
     file_type = file_type.upper()
     file_type_path = f'{main_directory}\{sub_directory}\{file_type}'
@@ -69,29 +71,32 @@ def create_subdirectory(main_directory, sub_directory, file_type):
     os.makedirs(file_type_path)
   except FileExistsError:
     print(f'{main_directory}\{sub_directory} files already exists')
-  return file_type_path
+  return file_type_path # String of sub directory path
 
 
 def read_filter(filter):
+  """Reads user created filter returns a set of all the file types white listed"""
   types = set()
   file = open(filter, 'r')
   for file_type in file:
     types.add(file_type.replace('\n', ''))
-  return types
+  return types # Set of file types
 
 
 def make_filter():
+  """Queries the user to create a filter if one was not given"""
   while True:
     types = input('Please enter all file types seperated by spaces: ')
     confirm = input(f'Does this look correct? y/n {types} |: ')
     if confirm.lower() == 'y':
       list_types = types.lower().split()
       break
-  return set(list_types)
+  return set(list_types) # Set of file types
 
 
-def vaild_inputs(main_folder, directory, destination, filter_path):
-  for character in main_folder:
+def vaild_inputs(main_folder_name, directory, destination, filter_path):
+  """Checks if the inputs given to the command line are valid"""
+  for character in main_folder_name:
     if character == '_':
       pass
     elif not character.isalnum():
@@ -115,18 +120,20 @@ def vaild_inputs(main_folder, directory, destination, filter_path):
   else:
     print('Directory path is invalid')
     sys.exit()
-  return destination
+  return destination # String of the destination's path 
 
 
 def get_file_type(file_name):
+  """Manipulates the file_name string to obtain the file type"""
   file_segments = file_name.split('.')
   if len(file_segments) < 2:
     pass
   else:
-    return file_name.split('.')[len(file_segments) - 1].lower()
+    return file_name.split('.')[len(file_segments) - 1].lower() # String of file type
 
 
 def traverse_directory(directory, main_directory_name, file_filter, destination):
+  """Goes through all allowed directory's obtaining the paths of white-listed types provided by the filter"""
   file_paths = {}
   avoid_directories = [main_directory_name, '$RECYCLE.BIN']
   # Sets filter for paths
@@ -150,10 +157,10 @@ def traverse_directory(directory, main_directory_name, file_filter, destination)
     # Traverses all directories in allowed directories
     while len(dirs_copy) > 0:
       for directory in dirs_copy:
-        result = input(f'Would you like to "move", "sort" or "avoid" "{directory}": ')
+        result = input(f'Would you like to |\'move\', \'sort\' or \'avoid\'| "{directory}" from {path}: ')
         if result.lower() == 'm' or result.lower() == 'move':
           print(f'Moving {directory}')
-          move_content(os.path.join(path, directory), main_directory_name)
+          move_content(os.path.join(path, directory), destination, main_directory_name)
         elif result.lower() == 's' or result.lower() == 'sort':
           print(f'Sorting {directory}')
         else:
@@ -163,29 +170,35 @@ def traverse_directory(directory, main_directory_name, file_filter, destination)
         for a_dir in avoid_directories:
           if a_dir in dirs:
             del dirs[dirs.index(a_dir)]
-  return file_paths
-
-def combine_dictionaries(higher_dictionary, lower_dictionary):
-  for file_type in higher_dictionary:
-    higher_dictionary[file_type] += lower_dictionary[file_type]
-  return higher_dictionary
-
-# TO-DO
-def move_content(content_path, destination):
-  pass
+  return file_paths # List of all file paths
 
 
-def main(main_folder, directory, destination=None, filter_path=None):
-  destination = vaild_inputs(main_folder, directory, destination, filter_path)
+def move_content(content_path, destination, main_directory_name=None):
+  """Moves content to designated directory"""
+  if os.path.isdir(content_path):
+    destination = f'{destination}\{main_directory_name}\Misc files'
+    dest = shutil.move(content_path, destination)
+  else:
+    dest = shutil.move(content_path, destination)
+  file_segment = content_path.split('\\')
+  file_name = content_path.split('\\')[len(file_segment) - 1]
+  print(f'{file_name} moved to "{dest}"')
+
+
+def main(main_folder_name, directory, destination=None, filter_path=None):
+  """Main function which calls the main functions to sort and move files and directories"""
+  destination = vaild_inputs(main_folder_name, directory, destination, filter_path)
   if filter_path is not None:
     file_filter = read_filter(filter_path)
   else:
     file_filter = make_filter()
-  sub_directories = create_folders(main_folder, destination, file_filter)
-  print(sub_directories)
-  file_paths = traverse_directory(directory, main_folder, file_filter, destination)
-  print(file_paths)
-  print('success')
+  sub_directories = create_folders(main_folder_name, destination, file_filter)
+  file_paths = traverse_directory(directory, main_folder_name, file_filter, destination)
+  # Loops through all file paths and sends the content to their repsective sub directory.
+  for file_type in file_filter:
+    for path in file_paths[file_type]:
+      move_content(path, sub_directories[file_type])
+  print(f'Successfully sorted and moved files from {directory} to {destination}')
 
 
 if __name__ == '__main__':

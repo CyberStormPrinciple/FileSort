@@ -1,6 +1,7 @@
 # Desc: Program that sorts contents of directories into folders based on a filter file.
 # Author: Nathan Gilbert
-import shutil, os, sys
+import shutil, os, sys, subprocess
+
 
 image_filetypes = ['tif', 'tiff', 'gif', 'jpeg', 'jpg', 'jif',
                   'jfif', 'jp2', 'jpx', 'j2k', 'j2c', 'fpx', 'pcd', 'png', 'ai', 'psd']
@@ -203,6 +204,12 @@ def main(main_folder_name, directory, destination=None, filter_path=None):
     for path in file_paths[file_type]:
       move_content(path, sub_directories[file_type])
   print(f'Successfully sorted and moved files from {directory} to {destination}')
+  result = input(f'Would you like to view {destination} y/n |: ')
+  if result.lower() == 'y':
+    destination = f'{destination}\{main_folder_name}'
+    print(f'Viewing {destination}')
+    subprocess.Popen(r'explorer /open,' + destination)
+  sys.exit()
 
 
 if __name__ == '__main__':

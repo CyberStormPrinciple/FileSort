@@ -175,14 +175,18 @@ def traverse_directory(directory, main_directory_name, file_filter, destination)
 
 def move_content(content_path, destination, main_directory_name=None):
   """Moves content to designated directory"""
-  if os.path.isdir(content_path):
-    destination = f'{destination}\{main_directory_name}\Misc files'
-    dest = shutil.move(content_path, destination)
-  else:
-    dest = shutil.move(content_path, destination)
+  try:
+    if os.path.isdir(content_path):
+      destination = f'{destination}\{main_directory_name}\Misc files'
+      dest = shutil.move(content_path, destination)
+    else:
+      dest = shutil.move(content_path, destination)
+  except:
+    dest = ''
   file_segment = content_path.split('\\')
   file_name = content_path.split('\\')[len(file_segment) - 1]
-  print(f'{file_name} moved to "{dest}"')
+  if dest != '':
+    print(f'{file_name} moved to "{dest}"')
 
 
 def main(main_folder_name, directory, destination=None, filter_path=None):

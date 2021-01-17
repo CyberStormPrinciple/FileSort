@@ -1,3 +1,6 @@
 png
 pdf
 jpeg
+jpeg
+mov
+txt
